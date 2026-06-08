@@ -1,4 +1,23 @@
-# proyectoaulaNE
+# Proyecto final - UdeM
+
+## Informacion general
+
+- Asignatura: `NUEVOS ENFOQUES EN INGENIERIA DE SOFTWARE II`
+- Integrantes: `Juan Esteban Galvis`, `Daniela Puerta`
+- Tipo de problema: regresion
+- Variable objetivo: `Factura_Promedio_COP`
+
+### Contexto del problema
+
+Este proyecto busca construir una base analitica para un modelo predictivo de la facturacion energetica en Colombia. A partir de reportes oficiales del SUI sobre `Factura Promedio`, se realiza un proceso de ETL para consolidar la informacion y un EDA para identificar patrones, relaciones entre variables y consideraciones importantes antes de una etapa de modelado.
+
+### Resumen del dataset
+
+- Nombre del dataset trabajado: `sui_factura_promedio_consolidado.csv`
+- Fuente original: Superintendencia de Servicios Publicos Domiciliarios, portal SUI
+- Cobertura: empresas del sector electrico reportadas en el indicador `Factura Promedio`
+- Periodo cubierto: enero de 2025 a marzo de 2026
+- Dimensiones del consolidado: `5809` filas y `6` columnas
 
 ## Inicio rapido
 
@@ -133,3 +152,27 @@ Los valores observados en la columna `Segmento` son:
 - El consolidado final esta en formato largo: una fila por `Empresa` + `Periodo` + `Segmento`.
 - El consolidado ya excluye filas de encabezado o contexto del SUI y conserva solo observaciones utiles para analisis.
 - El consolidado deja la variable de interes lista para visualizacion, agregacion y modelado: `Factura_Promedio_COP`.
+
+## Hallazgos del EDA y consideraciones para modelado
+
+### Hallazgos principales
+
+- El dataset consolidado no presenta valores nulos ni registros duplicados despues del ETL, por lo que queda en una condicion adecuada para analisis descriptivo y preparacion de modelado.
+- `Factura_Promedio_COP` tiene una distribucion fuertemente asimetrica hacia la derecha, con outliers altos que elevan la media general.
+- Los segmentos no residenciales, especialmente `Industrial`, concentran los valores promedio mas altos y la mayor dispersion.
+- `Empresa` y `Segmento` son las variables con mayor relacion con la facturacion promedio, mientras que `Mes` y `Anio` tienen una relacion mucho mas debil.
+- La correlacion lineal y los scatterplots muestran que no existe una tendencia temporal simple que explique por si sola el comportamiento de la facturacion.
+- Existe un caso puntual de valor negativo que debe revisarse antes de cualquier etapa predictiva.
+
+### Consideraciones para modelado
+
+- La variable objetivo del futuro modelo es `Factura_Promedio_COP`, por lo que el problema se aborda como regresion.
+- `Periodo` es una variable redundante respecto a `Anio` y `Mes`, por lo que no deberia usarse al mismo tiempo que ambas en un mismo modelo.
+- `Segmento` es una variable categorica apta para codificacion posterior, por ejemplo con `one-hot encoding`.
+- `Empresa` requiere un tratamiento especial por su alta cardinalidad; aplicar `one-hot encoding` de forma directa no seria la mejor opcion sin evaluacion previa.
+- `Total Residencial` y `Total No Residencial` son categorias agregadas del SUI, no segmentos base. Se conservaron en el EDA para respetar la estructura original de la fuente, pero para un modelo enfocado en segmentos especificos convendria excluirlos.
+- Dada la asimetria del target, conviene evaluar transformaciones del objetivo o enfoques robustos antes del entrenamiento.
+
+### Cierre metodologico
+
+El EDA permite concluir que el comportamiento de la facturacion promedio depende mas de diferencias entre empresas y segmentos que de una evolucion temporal lineal. Por eso, un primer modelo deberia priorizar variables de negocio como `Segmento` y `Empresa`, tratar con cuidado la alta cardinalidad, revisar el caso atipico negativo y considerar una version del dataset sin categorias agregadas para obtener un problema de modelado mas limpio y coherente.
