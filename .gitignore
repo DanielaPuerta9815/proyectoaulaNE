@@ -1,0 +1,22 @@
+# Python virtual environments
+.venv/
+
+# Python cache and build artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# uv lockfile and local env files
+.python-version
+
+# Editor and OS files
+.vscode/
+.DS_Store
+Thumbs.db
