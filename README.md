@@ -157,12 +157,19 @@ Los valores observados en la columna `Segmento` son:
 
 ### Hallazgos principales
 
-- El dataset consolidado no presenta valores nulos ni registros duplicados despues del ETL, por lo que queda en una condicion adecuada para analisis descriptivo y preparacion de modelado.
-- `Factura_Promedio_COP` tiene una distribucion fuertemente asimetrica hacia la derecha, con outliers altos que elevan la media general.
-- Los segmentos no residenciales, especialmente `Industrial`, concentran los valores promedio mas altos y la mayor dispersion.
-- `Empresa` y `Segmento` son las variables con mayor relacion con la facturacion promedio, mientras que `Mes` y `Anio` tienen una relacion mucho mas debil.
-- La correlacion lineal y los scatterplots muestran que no existe una tendencia temporal simple que explique por si sola el comportamiento de la facturacion.
-- Existe un caso puntual de valor negativo que debe revisarse antes de cualquier etapa predictiva.
+- El consolidado final contiene `5809` registros, `52` empresas y `12` segmentos reportados entre enero de 2025 y marzo de 2026.
+- Despues del ETL, el dataset no presenta valores nulos ni registros duplicados, lo que lo deja en una condicion adecuada para analisis descriptivo y preparacion de modelado.
+- La distribucion de `Factura_Promedio_COP` es fuertemente asimetrica hacia la derecha: la media queda muy por encima de la mediana y existen outliers altos que arrastran el promedio general.
+- Los segmentos no residenciales, especialmente `Industrial`, concentran los valores promedio mas altos y la mayor dispersion. Ademas, `Total No Residencial` debe interpretarse con cuidado porque corresponde a una categoria agregada del SUI y no a un segmento base.
+- `Empresa` y `Segmento` son las variables con mayor relacion con la facturacion promedio, mientras que `Mes` y `Anio` muestran una relacion mucho mas debil.
+- El comportamiento temporal presenta fluctuaciones entre periodos, pero la correlacion lineal y los scatterplots muestran que no existe una tendencia uniforme simple que explique por si sola el comportamiento de la facturacion.
+- Se detecta un caso puntual con valor negativo en octubre de 2025 para la empresa `ELECTRIFICADORA DE SANTANDER S.A. E.S.P.` en el segmento `Otros`, que conviene revisar antes de cualquier etapa predictiva.
+
+### Interpretacion general
+
+El EDA muestra que el dataset no debe leerse como una sola poblacion homogenea. Las diferencias entre segmentos son amplias y, si se analiza solo el promedio global, se puede perder la lectura real del comportamiento de usuarios residenciales frente a usuarios no residenciales. Por eso, los analisis por segmento y por empresa resultan mas informativos que una unica medida agregada.
+
+Tambien se observa que una parte importante de la asimetria proviene de un conjunto reducido de empresas con facturas promedio muy superiores al resto. Esto hace recomendable complementar la media con mediana, percentiles o visualizaciones segmentadas cuando se quieran comunicar resultados o comparar periodos.
 
 ### Consideraciones para modelado
 
@@ -172,6 +179,15 @@ Los valores observados en la columna `Segmento` son:
 - `Empresa` requiere un tratamiento especial por su alta cardinalidad; aplicar `one-hot encoding` de forma directa no seria la mejor opcion sin evaluacion previa.
 - `Total Residencial` y `Total No Residencial` son categorias agregadas del SUI, no segmentos base. Se conservaron en el EDA para respetar la estructura original de la fuente, pero para un modelo enfocado en segmentos especificos convendria excluirlos.
 - Dada la asimetria del target, conviene evaluar transformaciones del objetivo o enfoques robustos antes del entrenamiento.
+
+### Consideraciones interesantes del ETL
+
+- El ETL filtra unicamente las filas de `factura promedio`, eliminando filas de contexto incluidas por el reporte original del SUI, como etiquetas de anio, mes o cobertura.
+- Los nombres de empresa se normalizan a mayusculas y se limpian espacios, lo que facilita agrupaciones y comparaciones consistentes.
+- Los valores faltantes originales (`ND`, `N/D`, `-` o vacios) se convierten a nulos y luego se excluyen en la salida final, mejorando la calidad analitica del consolidado.
+- La transformacion de formato ancho a largo permite comparar periodos y segmentos de forma mucho mas simple en pandas y en visualizaciones.
+- La diferencia en el numero de registros por segmento no necesariamente implica errores del ETL; en muchos casos refleja que no todas las empresas reportan datos validos para todos los segmentos en todos los meses.
+- Cada fila del consolidado representa un promedio reportado por empresa, periodo y segmento, no una factura individual. Esa diferencia es importante para evitar interpretaciones equivocadas sobre el nivel de detalle del dato.
 
 ### Cierre metodologico
 
