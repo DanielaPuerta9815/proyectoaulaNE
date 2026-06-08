@@ -3,7 +3,7 @@
 ## Informacion general
 
 - Asignatura: `NUEVOS ENFOQUES EN INGENIERIA DE SOFTWARE II`
-- Integrantes: `Juan Esteban Galvis`, `Daniela Puerta`
+- Integrantes: `Juan Esteban Galvis Bedoya`, `Daniela Puerta Mesa`
 - Tipo de problema: regresion
 - Variable objetivo: `Factura_Promedio_COP`
 
@@ -113,8 +113,10 @@ El notebook `ETLN.ipynb` construye `sui_factura_promedio_consolidado.csv` aplica
 5. Normaliza el nombre de `Empresa` pasandolo a mayusculas y quitando espacios sobrantes.
 6. Convierte a numerico las columnas de segmentos; los marcadores `ND`, `N/D`, `-` y vacios pasan a nulos.
 7. Reestructura el archivo de formato ancho a formato largo usando una fila por empresa, periodo y segmento.
-8. Elimina registros con `Factura_Promedio_COP` nula.
+8. Elimina registros con `Factura_Promedio_COP` nula y reporta cuantos se descartan en cantidad y porcentaje.
 9. Concatena todos los meses y exporta el consolidado en `utf-8-sig`.
+
+En el paso 8, la ETL detecta `11436` registros en formato largo antes de la limpieza y elimina `5627` observaciones con `Factura_Promedio_COP` faltante, equivalentes al `49.20%` del total transformado. Esta decision se justifica porque `Factura_Promedio_COP` es la variable objetivo reportada directamente por el SUI: imputar esos faltantes introduciria valores artificiales en el target, distorsionaria comparaciones entre empresas y segmentos y mezclaria observaciones reales con supuestos. Como los marcadores originales (`ND`, `N/D`, `-` y vacios) representan dato no reportado o no disponible, el criterio mas conservador para el EDA y para un modelado posterior es conservar solo registros efectivamente reportados.
 
 ### Archivo consolidado final
 
@@ -184,7 +186,8 @@ Tambien se observa que una parte importante de la asimetria proviene de un conju
 
 - El ETL filtra unicamente las filas de `factura promedio`, eliminando filas de contexto incluidas por el reporte original del SUI, como etiquetas de anio, mes o cobertura.
 - Los nombres de empresa se normalizan a mayusculas y se limpian espacios, lo que facilita agrupaciones y comparaciones consistentes.
-- Los valores faltantes originales (`ND`, `N/D`, `-` o vacios) se convierten a nulos y luego se excluyen en la salida final, mejorando la calidad analitica del consolidado.
+- Los valores faltantes originales (`ND`, `N/D`, `-` o vacios) se convierten a nulos y luego se excluyen en la salida final. En total se descartan `5627` registros, equivalentes al `49.20%` de los `11436` registros generados en formato largo antes de la limpieza.
+- La exclusion de esos faltantes se mantiene de forma deliberada: al tratarse de la variable objetivo reportada por la fuente, imputarla introduciria facturas artificiales y sesgaria el analisis descriptivo y cualquier modelo posterior.
 - La transformacion de formato ancho a largo permite comparar periodos y segmentos de forma mucho mas simple en pandas y en visualizaciones.
 - La diferencia en el numero de registros por segmento no necesariamente implica errores del ETL; en muchos casos refleja que no todas las empresas reportan datos validos para todos los segmentos en todos los meses.
 - Cada fila del consolidado representa un promedio reportado por empresa, periodo y segmento, no una factura individual. Esa diferencia es importante para evitar interpretaciones equivocadas sobre el nivel de detalle del dato.
