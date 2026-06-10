@@ -18,6 +18,11 @@ mlruns/
 mlflow.db
 mlartifacts/
 
+# Serving model artifacts (generated files)
+serving/artifacts/*.joblib
+serving/artifacts/*.json
+!serving/artifacts/.gitkeep
+
 # uv lockfile and local env files
 .python-version
 
