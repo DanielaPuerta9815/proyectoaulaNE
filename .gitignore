@@ -13,6 +13,11 @@ __pycache__/
 # Jupyter
 .ipynb_checkpoints/
 
+# MLflow local tracking artifacts
+mlruns/
+mlflow.db
+mlartifacts/
+
 # uv lockfile and local env files
 .python-version
 
