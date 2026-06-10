@@ -34,6 +34,14 @@ Este proyecto usa `uv` para gestionar el entorno de Python y las dependencias de
 2. Desde la carpeta del proyecto, crea y sincroniza el entorno: `uv sync`
 3. Ejecuta comandos dentro del entorno con: `uv run <comando>`
 
+## API de prediccion (FastAPI + Docker)
+
+Se agrego una implementacion de serving basada en el mejor modelo de `MODELS.ipynb` (`Linear Regression`).
+
+Guia completa de instalacion, entrenamiento, despliegue y uso:
+
+- `serving/DEPLOY_API.md`
+
 ### Activar el entorno
 
 Si quieres activar el entorno manualmente despues de `uv sync`, usa una de estas opciones:
