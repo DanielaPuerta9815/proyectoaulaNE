@@ -34,6 +34,134 @@ Este proyecto usa `uv` para gestionar el entorno de Python y las dependencias de
 2. Desde la carpeta del proyecto, crea y sincroniza el entorno: `uv sync`
 3. Ejecuta comandos dentro del entorno con: `uv run <comando>`
 
+## API de prediccion (FastAPI + Docker)
+
+Se agrego una implementacion de serving basada en el mejor modelo de `MODELS.ipynb` (`Linear Regression`).
+
+Guia completa de instalacion, entrenamiento, despliegue y uso:
+
+- `serving/DEPLOY_API.md`
+
+### Que hace la API
+
+La API expone un modelo de regresion lineal para estimar `Factura_Promedio_COP` a partir de:
+
+- `anio`
+- `mes`
+- `segmento`
+
+Incluye endpoints de salud (`/health`), prediccion unitaria (`/predict`) y prediccion por lotes (`/predict-batch`).
+
+### Input y output de la API
+
+Input para `POST /predict`:
+
+```json
+{
+  "anio": 2026,
+  "mes": 3,
+  "segmento": "Estrato 3"
+}
+```
+
+Output de `POST /predict`:
+
+```json
+{
+  "prediction_log": 11.9348,
+  "prediction_cop": 152492.43
+}
+```
+
+- `prediction_log`: prediccion en escala logaritmica (`log1p`).
+- `prediction_cop`: prediccion final en COP (escala original).
+
+### Comandos para crear modelo, ejecutar API y probar
+
+Todos los comandos se ejecutan desde la carpeta raiz del proyecto.
+
+1. Crear entorno virtual (sin uv):
+
+```bash
+python -m venv .venv
+```
+
+2. Activar entorno:
+
+- PowerShell:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+- CMD:
+
+```bat
+.venv\Scripts\activate.bat
+```
+
+- Git Bash:
+
+```bash
+source .venv/Scripts/activate
+```
+
+3. Instalar dependencias:
+
+```bash
+python -m pip install --upgrade pip
+pip install fastapi "uvicorn[standard]" pandas numpy scikit-learn joblib mlflow matplotlib seaborn ipykernel
+```
+
+4. Entrenar y serializar modelo:
+
+```bash
+python serving/train_linear_model.py
+```
+
+5. Ejecutar API:
+
+```bash
+python -m uvicorn serving.app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+6. Probar salud con curl:
+
+```bash
+curl -X GET "http://127.0.0.1:8000/health"
+```
+
+7. Probar prediccion unitaria con curl:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/predict" \
+	-H "Content-Type: application/json" \
+	-d '{"anio": 2026, "mes": 3, "segmento": "Estrato 3"}'
+```
+
+8. Probar prediccion batch con curl:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/predict-batch" \
+	-H "Content-Type: application/json" \
+	-d '{"records":[{"anio":2026,"mes":3,"segmento":"Estrato 3"},{"anio":2026,"mes":3,"segmento":"Industrial"}]}'
+```
+
+9. Probar por interfaz Swagger:
+
+- `http://127.0.0.1:8000/docs`
+
+### Archivos dentro de serving
+
+- `serving/train_linear_model.py`: entrena el modelo Linear Regression y genera artefactos para inferencia.
+- `serving/DEPLOY_API.md`: guia de instalacion, despliegue y uso de la API.
+- `serving/app/main.py`: define la app FastAPI y los endpoints REST.
+- `serving/app/model_service.py`: carga el modelo serializado y ejecuta predicciones.
+- `serving/app/schemas.py`: define validaciones de entrada y formato de respuesta.
+- `serving/artifacts/.gitkeep`: mantiene la carpeta de artefactos en el repositorio.
+- `serving/artifacts/*.joblib`: modelo entrenado serializado (generado en runtime).
+- `serving/artifacts/*.json`: metadata del modelo (generada en runtime).
+
 ### Activar el entorno
 
 Si quieres activar el entorno manualmente despues de `uv sync`, usa una de estas opciones:
